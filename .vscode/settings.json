@@ -1,0 +1,8 @@
+{
+  "code-runner.executorMap": {
+    "javascript": "node",
+    "typescript": "cls && npx tsx"
+  },
+  "code-runner.clearPreviousOutput": true,
+  "code-runner.showExecutionMessage": false
+}

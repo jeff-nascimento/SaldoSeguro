@@ -1,0 +1,89 @@
+{
+  "compilerOptions": {
+    /* --- Alvo e Ambiente --- */
+
+    // Define para qual versão do JavaScript o seu código será convertido.
+    // ES2022 permite usar recursos modernos como Top-level await e métodos de classe privados.
+    "target": "ES2022",
+
+    // Inclui definições de tipos para recursos que o navegador possui (DOM)
+    // e para as versões mais recentes do JavaScript (ESNext).
+    "lib": ["ESNext", "DOM"],
+
+    /* --- Sistema de Módulos (Híbrido) --- */
+
+    // Define que o código gerado deve usar módulos modernos (import/export).
+    "module": "ESNext",
+
+    // "bundler" é a estratégia ideal quando usamos Webpack.
+    // Ele permite importar arquivos sem precisar colocar a extensão .ts ou .js no final.
+    "moduleResolution": "bundler",
+
+    // Garante compatibilidade ao importar bibliotecas que usam o sistema antigo (CommonJS).
+    // Sem isso, alguns imports de bibliotecas podem falhar.
+    "esModuleInterop": true,
+
+    // Força o Windows e o Mac a respeitarem letras maiúsculas/minúsculas nos nomes de arquivos.
+    // Evita erros quando você sobe o código para um servidor Linux.
+    "forceConsistentCasingInFileNames": true,
+
+    /* --- Estrutura de Pastas --- */
+
+    // Informa que todo o seu código-fonte original está dentro da pasta 'src'.
+    "rootDir": "./src",
+
+    // Local onde o TypeScript colocaria os arquivos convertidos (embora no híbrido o Webpack gerencie isso).
+    "outDir": "./dist",
+
+    /* --- Debug e Tipagem Externa --- */
+
+    // Cria arquivos .map que ligam o JavaScript gerado ao seu TypeScript original.
+    // Essencial para você conseguir debugar no navegador vendo o seu código .ts.
+    "sourceMap": true,
+
+    // Gera arquivos .d.ts. Eles são "mapas de tipos" que descrevem seu código.
+    "declaration": true,
+
+    // Permite que outros desenvolvedores (ou você mesmo em outro arquivo) cliquem
+    // em uma função e o VS Code leve direto para o código fonte original.
+    "declarationMap": true,
+
+    /* --- Regras de Rigor (Segurança contra Bugs) --- */
+
+    // Ativa todas as verificações de segurança. O TypeScript será mais "chato",
+    // mas isso evita 90% dos erros comuns de programação.
+    "strict": true,
+
+    // Pula a verificação de tipos dentro da pasta node_modules para ganhar velocidade.
+    "skipLibCheck": true,
+
+    // Segurança extra para Arrays: se você tentar acessar uma posição que não existe,
+    // o TS te avisa que o valor pode ser 'undefined'.
+    "noUncheckedIndexedAccess": true,
+
+    // Garante que, se uma propriedade é opcional (?), você não possa atribuir 'undefined'
+    // a ela manualmente se isso não for explicitamente permitido.
+    "exactOptionalPropertyTypes": true,
+
+    /* --- Ajustes de Execução --- */
+
+    // Força o TypeScript a tratar todos os arquivos como módulos, evitando que
+    // uma variável em um arquivo "vaze" para outro arquivo de aula.
+    "moduleDetection": "force",
+
+    // Permite que você use arquivos .js dentro do seu projeto de estudo sem que o TS reclame.
+    "allowJs": true
+
+    // //decorators
+    // "experimentalDecorators": true,
+    // "emitDecoratorMetadata": true
+  },
+
+  /* --- Inclusão e Exclusão --- */
+
+  // Diz ao TS para monitorar todos os arquivos .ts dentro da pasta src e subpastas.
+  "include": ["src/**/*.ts"],
+
+  // Ignora completamente a pasta de bibliotecas e a pasta de saída para não causar lentidão.
+  "exclude": ["node_modules", "dist"]
+}
