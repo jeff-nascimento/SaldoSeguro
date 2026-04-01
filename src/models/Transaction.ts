@@ -1,3 +1,10 @@
+/**
+ * Domain model representing a financial transaction.
+ *
+ * Design decision:
+ * This class encapsulates validation rules to guarantee that every instance
+ * is always created in a valid state (fail-fast approach).
+ */
 export class Transaction {
   private _id: string;
 
@@ -9,8 +16,10 @@ export class Transaction {
     private _date: string,
     id?: string
   ) {
+    // Ensures each transaction has a unique identifier
     this._id = id ?? crypto.randomUUID();
 
+    // Basic domain validations to prevent invalid data propagation
     if (this._description.trim() === '') {
       throw new Error('A descrição não pode estar vazia.');
     }
@@ -23,6 +32,7 @@ export class Transaction {
       throw new Error('O valor deve ser maior que zero.');
     }
 
+    // Restricts transaction type to known domain values
     if (this._type !== 'income' && this._type !== 'expense') {
       throw new Error('Tipo inválido.');
     }
@@ -32,6 +42,7 @@ export class Transaction {
     }
   }
 
+  // Expose read-only access to preserve immutability from outside
   get description(): string {
     return this._description;
   }

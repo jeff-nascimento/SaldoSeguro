@@ -1,3 +1,10 @@
+/**
+ * View responsible for rendering the transactions table and handling user interactions.
+ *
+ * Design decision:
+ * Uses event delegation for scalability and performance,
+ * avoiding multiple event listeners for each row/button.
+ */
 import { Transaction } from '../models/Transaction';
 import { SortColumn, SortDirection } from '../types/Sorting';
 import { Formatter } from '../utils/Formatter';
@@ -12,10 +19,13 @@ export class TransactionTableView {
   ) as HTMLTableElement;
 
   renderTable(transactions: Transaction[]): void {
+    // Clears previous state before re-rendering
     this.transactionsBody.innerHTML = '';
 
     transactions.forEach((t) => {
       const row = document.createElement('tr');
+
+      // Associates DOM element with domain entity
       row.dataset.id = String(t.id);
 
       row.innerHTML = `
@@ -37,6 +47,7 @@ export class TransactionTableView {
       `tr[data-id="${transactionId}"]`
     ) as HTMLTableRowElement;
 
+    // Provides temporary visual feedback after update
     row.classList.add('highlight-row');
 
     setTimeout(() => {
@@ -46,10 +57,13 @@ export class TransactionTableView {
 
   bindDelete(handler: (id: string) => void): void {
     if (this.transactionsBody) {
+      // Event delegation: single listener handles all delete buttons
       this.transactionsBody.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
+
         if (target.classList.contains('delete-btn')) {
           const id = target.dataset.id;
+
           if (id) handler(id);
         }
       });
@@ -58,10 +72,13 @@ export class TransactionTableView {
 
   bindEdit(handler: (id: string) => void): void {
     if (this.transactionsBody) {
+      // Reuses same delegation strategy for edit actions
       this.transactionsBody.addEventListener('click', (e) => {
         const target = e.target as HTMLElement;
+
         if (target.classList.contains('edit-btn')) {
           const id = target.dataset.id;
+
           if (id) handler(id);
         }
       });
@@ -73,6 +90,7 @@ export class TransactionTableView {
       this.transactionsTable.addEventListener('click', (e) => {
         const target = (e.target as HTMLElement).closest('th');
 
+        // Only sortable headers trigger sorting behavior
         if (target && target.classList.contains('sortable')) {
           const field = target.dataset.sort;
 
@@ -91,11 +109,14 @@ export class TransactionTableView {
       const icon = header.querySelector('.sort-icon') as HTMLElement;
       const column = header.getAttribute('data-sort') as SortColumn;
 
+      // Resets all icons before applying active state
       icon.classList.remove('fi-ss-caret-up', 'fi-ss-caret-down');
 
       if (column === activeColumn) {
         const classToAdd =
           direction === 'asc' ? 'fi-ss-caret-up' : 'fi-ss-caret-down';
+
+        // Reflects current sorting state visually
         icon.classList.add(classToAdd);
       }
     });

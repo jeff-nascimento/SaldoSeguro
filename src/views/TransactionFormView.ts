@@ -1,3 +1,10 @@
+/**
+ * View responsible for handling transaction form interactions and data extraction.
+ *
+ * Design decision:
+ * Encapsulates all form-related logic (formatting, input handling, UI rules),
+ * keeping the controller focused only on orchestration.
+ */
 import { Transaction } from '../models/Transaction';
 
 export class TransactionFormView {
@@ -11,10 +18,12 @@ export class TransactionFormView {
   private date = document.querySelector('#date') as HTMLInputElement;
 
   constructor() {
+    // Applies real-time formatting to amount input for better UX
     this.amount.addEventListener('input', this.handleAmountInput);
   }
 
   getFormData() {
+    // Normalizes formatted currency string into a numeric value
     const rawValue = this.amount.value.replace(/\./g, '').replace(',', '.');
 
     return {
@@ -27,6 +36,7 @@ export class TransactionFormView {
   }
 
   fillForm(transaction: Transaction): void {
+    // Pre-fills form for editing, reusing same submission flow
     this.description.value = transaction.description;
 
     this.amount.value = transaction.amount.toLocaleString('pt-BR', {
@@ -40,10 +50,12 @@ export class TransactionFormView {
   }
 
   clearForm(): void {
+    // Uses native reset for simplicity and consistency
     this.form.reset();
   }
 
   bindSubmit(handler: () => void): void {
+    // Prevents default form submission to keep SPA behavior
     this.form.addEventListener('submit', (event) => {
       event.preventDefault();
       handler();
@@ -53,6 +65,7 @@ export class TransactionFormView {
   handleAmountInput(event: Event): void {
     const input = event.target as HTMLInputElement;
 
+    // Keeps only numeric characters for controlled formatting
     let value = input.value.replace(/\D/g, '');
 
     if (value === '') {
@@ -60,6 +73,7 @@ export class TransactionFormView {
       return;
     }
 
+    // Converts integer to decimal representation (cents → currency)
     const amount = Number(value) / 100;
 
     input.value = amount.toLocaleString('pt-BR', {
@@ -72,6 +86,11 @@ export class TransactionFormView {
     if (this.type && this.category) {
       const categoryGroup = this.category.parentElement as HTMLElement;
 
+      /**
+       * Dynamic UI rule:
+       * Category is only relevant for expenses.
+       * Hidden for income to avoid inconsistent data.
+       */
       const updateVisibility = () => {
         if (this.type.value === 'income') {
           categoryGroup.style.display = 'none';
@@ -79,13 +98,16 @@ export class TransactionFormView {
         } else {
           categoryGroup.style.display = 'block';
 
+          // Ensures a valid category is always selected when visible
           if (this.category.value === '') {
             this.category.selectedIndex = 0;
           }
         }
       };
 
+      // Keeps UI synchronized with user selection
       this.type.addEventListener('change', updateVisibility);
+
       updateVisibility();
     }
   }

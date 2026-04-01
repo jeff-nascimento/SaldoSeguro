@@ -1,3 +1,11 @@
+/**
+ * Main controller responsible for orchestrating interactions
+ * between Views (UI) and Services (business logic).
+ *
+ * Design decision:
+ * This controller delegates responsibilities to services and views
+ * to avoid becoming a God Class, acting mainly as a coordinator.
+ */
 import { FilterView } from '../views/FilterView';
 import { ModalView } from '../views/ModalView';
 import { NotificationView } from '../views/NotificationView';
@@ -27,13 +35,14 @@ export class Controller {
   private chartView = new ChartView();
   private uiState = new UIStateView();
 
+  // Tracks current UI interaction state (editing, sorting, deletion flow)
   private editingId?: string;
-  //   private pendingDeleteId?: string;
   private sortColumn?: SortColumn;
   private sortDirection: SortDirection = 'asc';
   private idPendingDeletion?: string;
 
   constructor() {
+    // Bind UI events to controller handlers (centralized event orchestration)
     this.formView.bindSubmit(this.handleSubmit);
 
     this.tableView.bindDelete(this.handleDelete);
@@ -57,6 +66,7 @@ export class Controller {
 
     this.summaryView.bindSummaryClicks(this.handleSummaryClick);
 
+    // Restore persisted filters to keep user context between sessions
     const savedFilters = this.loadFilters();
 
     if (savedFilters) {
@@ -68,6 +78,7 @@ export class Controller {
   }
 
   private saveFilters(filter: FilterData) {
+    // Persist filters to maintain UX continuity
     FilterStorageService.save<FilterData>('filters_data', filter);
   }
 
@@ -76,10 +87,15 @@ export class Controller {
   }
 
   private refreshUI(): void {
+    // Central reload point: ensures UI stays consistent with data source
     const allTransactions = this.transactionService.getAll();
     this.updateUI(allTransactions);
   }
 
+  /**
+   * Core UI update pipeline:
+   * Ensures table, summary, and chart stay synchronized.
+   */
   private updateUI(transactions: Transaction[]): void {
     this.tableView.renderTable(transactions);
 
@@ -98,6 +114,7 @@ export class Controller {
     const foundTransaction = this.transactionService.findById(id);
 
     if (foundTransaction) {
+      // Pre-fills form to reuse the same submission flow for updates
       this.formView.fillForm(foundTransaction);
       this.notification.showMessage('Modo de edição ativado', 'info');
     }
@@ -106,6 +123,8 @@ export class Controller {
   handleFilter = () => {
     const filters = this.filterView.getFilterData();
     const allTransactions = this.transactionService.getAll();
+
+    // Filtering is delegated to service to keep controller thin
     const filteredTransactions = this.transactionService.filterTransactions(
       allTransactions,
       filters
@@ -120,6 +139,7 @@ export class Controller {
     const transaction = this.transactionService.findById(id);
 
     if (transaction) {
+      // Deletion requires confirmation, so we store state temporarily
       this.idPendingDeletion = id;
       this.modalView.showConfirmModal();
     }
@@ -137,6 +157,7 @@ export class Controller {
   };
 
   private handleCancelDelete = () => {
+    // Reset deletion state when user cancels
     this.idPendingDeletion = undefined;
     this.modalView.hideConfirmModal();
   };
@@ -154,6 +175,7 @@ export class Controller {
         this.editingId
       );
 
+      // Same flow handles both create and update to reduce duplication
       if (this.editingId === undefined) {
         this.transactionService.add(newTransaction);
 
@@ -172,6 +194,7 @@ export class Controller {
 
         this.refreshUI();
 
+        // UX detail: highlight updated row for user feedback
         this.tableView.highlightRow(idToHighlight);
 
         this.notification.showMessage('Transação atualizada.', 'info');
@@ -186,6 +209,7 @@ export class Controller {
   };
 
   private handleSort = (column: SortColumn) => {
+    // Toggle sorting direction if same column is clicked
     if (column === this.sortColumn) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
@@ -207,6 +231,7 @@ export class Controller {
   };
 
   private handleClearFilters = () => {
+    // Reset filters and reuse filtering pipeline
     this.filterView.resetFilterFields();
     this.handleFilter();
   };
@@ -214,12 +239,14 @@ export class Controller {
   private handleSummaryClick = (type: 'income' | 'expense' | 'all') => {
     const currentFilters = this.filterView.getFilterData();
 
+    // Clicking summary cards acts as a quick filter shortcut
     currentFilters.filterType = type;
 
     this.filterView.setFilterFields(currentFilters);
 
     this.handleFilter();
 
+    // Sync visual state with selected filter
     this.uiState.updateActiveCard(type);
   };
 }
